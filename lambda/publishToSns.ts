@@ -5,19 +5,23 @@ export const handler = async (event: any): Promise<any> => {
   const chatbotTopicARN = process.env.TOPIC_ARN!;
 
   const byAccountResult = event.ByAccountResult;
-  const notAssociatedResult = event.NotAssociatedResult.Results.map(
-    (item: any) => {
+  const byAccountTable = arrayToTable(byAccountResult);
+
+  let notAssociatedResult;
+  if (event.NotAssociatedResult.Results.length > 0) {
+    notAssociatedResult = event.NotAssociatedResult.Results.map((item: any) => {
       item = JSON.parse(item);
       return {
         accountId: item.accountId,
         region: item.awsRegion,
         publicIp: item.configuration.publicIp,
       };
-    }
-  );
+    });
+  }
 
-  const byAccountTable = arrayToTable(byAccountResult);
-  const notAssociatedTable = arrayToTable(notAssociatedResult);
+  const notAssociatedTable = notAssociatedResult
+    ? arrayToTable(notAssociatedResult)
+    : "なし";
   // console.log(byAccountTable);
   // console.log(notAssociatedTable);
   let content = `
